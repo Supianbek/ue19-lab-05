@@ -24,8 +24,10 @@ Pour exécuter le script :
 python app.py
 
 Avec docker :
--Construire l'image Docker : 
+
+Construire l'image Docker : 
 docker build -t jokes-fetcher .
--Executer le programme :
+
+Executer le programme :
 docker run --rm jokes-fetcher
 
