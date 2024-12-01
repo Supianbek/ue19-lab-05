@@ -62,10 +62,15 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
-      # Install Trivy using package manager (more reliable)
+      # Install Trivy using the official installation script
       - name: Install Trivy
         run: |
           curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -
+
+      # Verify Trivy installation
+      - name: Verify Trivy installation
+        run: |
+          trivy --version
 
       # Scan Docker image for vulnerabilities
       - name: Scan Docker image for vulnerabilities
