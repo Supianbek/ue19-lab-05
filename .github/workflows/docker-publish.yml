@@ -64,12 +64,13 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-# Scan Docker image for vulnerabilities using Trivy
-- name: Scan Docker image for vulnerabilities with Trivy
-  uses: aquasecurity/trivy-action@v0.4.0
-  with:
-    image: ${{ steps.meta.outputs.tags }}
-  continue-on-error: true
+      # Scan Docker image for vulnerabilities using Trivy
+      - name: Scan Docker image for vulnerabilities with Trivy
+        uses: aquasecurity/trivy-action@v0.4.0
+        with:
+          image: ${{ steps.meta.outputs.tags }}
+        continue-on-error: true
+
       # Sign the Docker image
       - name: Sign the published Docker image
         if: ${{ github.event_name != 'pull_request' }}
