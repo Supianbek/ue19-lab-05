@@ -1,80 +1,129 @@
 name: Docker
 
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
 on:
   schedule:
-    - cron: '29 11 * * *'
+    - cron: '45 16 * * *'
   push:
     branches: [ "main" ]
+    # Publish semver tags as releases.
     tags: [ 'v*.*.*' ]
   pull_request:
     branches: [ "main" ]
 
 env:
+  # Use docker.io for Docker Hub if empty
   REGISTRY: ghcr.io
+  # github.repository as <account>/<repo>
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   build:
+
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
+      # This is used to complete the identity challenge
+      # with sigstore/fulcio when running outside of PRs.
       id-token: write
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Install cosign tool except on PR
+      # Install the cosign tool except on PR
+      # https://github.com/sigstore/cosign-installer
       - name: Install cosign
         if: github.event_name != 'pull_request'
-        uses: sigstore/cosign-installer@59acb6260d9c0ba8f4a2f9d9b48431a222b68e20
+        uses: sigstore/cosign-installer@59acb6260d9c0ba8f4a2f9d9b48431a222b68e20 #v3.5.0
         with:
           cosign-release: 'v2.2.4'
 
-      # Set up BuildKit Docker container builder
+      # Set up BuildKit Docker container builder to be able to build
+      # multi-platform images and export cache
+      # https://github.com/docker/setup-buildx-action
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@f95db51fddba0c2d1ec667646a06c2ce06100226
+        uses: docker/setup-buildx-action@f95db51fddba0c2d1ec667646a06c2ce06100226 # v3.0.0
 
-      # Login against Docker registry
+      # Login against a Docker registry except on PR
+      # https://github.com/docker/login-action
       - name: Log into registry ${{ env.REGISTRY }}
         if: github.event_name != 'pull_request'
-        uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d
+        uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # Extract Docker metadata
+      # Extract metadata (tags, labels) for Docker
+      # https://github.com/docker/metadata-action
       - name: Extract Docker metadata
         id: meta
-        uses: docker/metadata-action@96383f45573cb7f253c731d3b3ab81c87ef81934
+        uses: docker/metadata-action@96383f45573cb7f253c731d3b3ab81c87ef81934 # v5.0.0
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
-      # Build Docker image
+      # Build Docker image but do not push yet
       - name: Build Docker image
-        id: build-and-push
-        uses: docker/build-push-action@0565240e2d4ab88bba5387d719585280857ece09
+        id: build
+        uses: docker/build-push-action@v2
         with:
           context: .
-          push: ${{ github.event_name != 'pull_request' }}
+          push: false
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
 
-      # Scan Docker image for vulnerabilities using Trivy
-      - name: Scan Docker image for vulnerabilities with Trivy
-        uses: aquasecurity/trivy-action@v0.4.0
+      # Install Trivy for vulnerability scanning
+      - name: Install Trivy
+        run: |
+          VERSION="0.26.0"  # Vous pouvez changer cette version si nécessaire
+          TRIVY_URL="https://github.com/aquasecurity/trivy/releases/download/v${VERSION}/trivy_${VERSION}_Linux-x86_64.tar.gz"
+          
+          # Vérifier si l'URL est accessible avant de télécharger
+          curl -I -s "$TRIVY_URL" | grep "200 OK" || { echo "Erreur lors de l'accès à l'URL"; exit 1; }
+          
+          # Télécharger Trivy
+          curl -sfL "$TRIVY_URL" -o trivy.tar.gz
+          
+          # Vérifier que le fichier est bien un fichier tar.gz
+          file trivy.tar.gz
+          
+          # Extraire le fichier tar.gz
+          tar zxvf trivy.tar.gz
+          
+          # Déplacer Trivy dans /usr/local/bin
+          sudo mv trivy /usr/local/bin/
+
+
+
+      # Scan the Docker image for vulnerabilities
+      - name: Scan Docker image for vulnerabilities
+        run: |
+          trivy image ghcr.io/${{ github.repository }}:latest
+
+      # Build and push Docker image if no vulnerabilities were found
+      - name: Build and push Docker image
+        if: success()
+        uses: docker/build-push-action@v2
         with:
-          image: ${{ steps.meta.outputs.tags }}
-        continue-on-error: true
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
 
-      # Sign the Docker image
+      # Sign the resulting Docker image digest except on PRs.
+      # This will only write to the public Rekor transparency log when the Docker
+      # repository is public to avoid leaking data. If you would like to publish
+      # transparency data even for private images, pass --force to cosign below.
+      # https://github.com/sigstore/cosign
       - name: Sign the published Docker image
         if: ${{ github.event_name != 'pull_request' }}
         env:
           TAGS: ${{ steps.meta.outputs.tags }}
-          DIGEST: ${{ steps.build-and-push.outputs.digest }}
+          DIGEST: ${{ steps.build.outputs.digest }}
         run: echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}
