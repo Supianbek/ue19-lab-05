@@ -1,33 +1,61 @@
 # ue19-lab-05
 
 
-# Jokes Fetcher Application
+### Jokes Fetcher
+Une application Python qui interroge une API publique pour récupérer une blague aléatoire et l'afficher dans le terminal.
 
-Description :
-Cette application interroge une API publique (JokesAPI) pour récupérer et afficher une blague aléatoire.
+### Aperçu
+Le but de cette application est de rendre votre journée un peu plus joyeuse en vous racontant une blague issue de l'API JokesAPI. Qu'il s'agisse de blagues courtes ou de dialogues humoristiques, notre application vous garantit une touche de légèreté en quelques secondes.
 
-Prérequis :
-- Python 3.8 ou supérieur
-- `pip` pour installer les dépendances
-- Docker (optionnel, pour exécuter l'application dans un conteneur)
+### Fonctionnalités
+- Obtenez une blague aléatoire à chaque exécution.
+- Prend en charge différents types de blagues (simples ou en deux parties).
+- Facile à configurer et à exécuter.
+-Compatible avec Docker pour une exécution simplifiée.
 
-Installation :
-1. Clonez ce repository :
-   ```bash
-   git clone https://github.com/Supianbek/ue19-lab-05.git
-   cd ue19-lab-05
+### Prérequis
+Avant de commencer, assurez-vous d'avoir installé :
 
-Installez les dépendances :
+- Python : Version 3.8 ou supérieure.
+- pip : Gestionnaire de paquets Python.
+- Docker (optionnel) : Si vous souhaitez exécuter l'application dans un conteneur.
+  
+### Installation
+Étape 1 : Clonez ce repository
+git clone https://github.com/<votre-utilisateur>/ue19-lab-05.git
+cd ue19-lab-05
+
+Étape 2 : Installez les dépendances
+
 pip install -r requirements.txt
 
-Pour exécuter le script :
+### Utilisation
+Pour exécuter l'application localement :
 python app.py
 
-Avec docker :
+### Exemple de sortie :
+Voici une blague pour vous :
+Pourquoi les mathématiques sont-elles tristes ? ... Parce qu'elles ont beaucoup de problèmes.
 
-Construire l'image Docker : 
+### Développement avec Docker
+Étape 1 : Construisez l'image Docker
 docker build -t jokes-fetcher .
 
-Executer le programme :
+Étape 2 : Exécutez le conteneur
 docker run --rm jokes-fetcher
 
+### Contribuer
+Les contributions sont les bienvenues ! Si vous avez des idées pour améliorer ce projet :
+Forkez ce repository.
+Créez une nouvelle branche pour vos modifications :
+git checkout -b feature/nom-de-la-fonctionnalité
+
+Effectuez vos modifications et commitez-les :
+git commit -m "Ajout d'une nouvelle fonctionnalité"
+
+Poussez vos changements :
+git push origin feature/nom-de-la-fonctionnalité
+Ouvrez une Pull Request.
+
+### Licence
+Ce projet est sous licence MIT. Consultez le fichier LICENSE pour plus d'informations.
