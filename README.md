@@ -16,3 +16,16 @@ Installation :
    ```bash
    git clone https://github.com/Supianbek/ue19-lab-05.git
    cd ue19-lab-05
+
+Installez les dépendances :
+pip install -r requirements.txt
+
+Pour exécuter le script :
+python app.py
+
+Avec docker :
+-Construire l'image Docker : 
+docker build -t jokes-fetcher .
+-Executer le programme :
+docker run --rm jokes-fetcher
+
