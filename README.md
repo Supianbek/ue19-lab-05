@@ -21,11 +21,11 @@ Avant de commencer, assurez-vous d'avoir installé :
 - Docker (optionnel) : Si vous souhaitez exécuter l'application dans un conteneur.
   
 ### Installation
-Étape 1 : Clonez ce repository
+Étape 1 : Clonez ce repository :
 git clone https://github.com/<votre-utilisateur>/ue19-lab-05.git
 cd ue19-lab-05
 
-Étape 2 : Installez les dépendances
+Étape 2 : Installez les dépendances :
 
 pip install -r requirements.txt
 
@@ -38,17 +38,12 @@ Voici une blague pour vous :
 Pourquoi les mathématiques sont-elles tristes ? ... Parce qu'elles ont beaucoup de problèmes.
 
 ### Développement avec Docker
-Étape 1 : Construisez l'image Docker
+Étape 1 : Construisez l'image Docker :
 docker build -t jokes-fetcher .
 
-Étape 2 : Exécutez le conteneur
+Étape 2 : Exécutez le conteneur :
 docker run --rm jokes-fetcher
 
-### Contribuer
-Les contributions sont les bienvenues ! Si vous avez des idées pour améliorer ce projet :
-Forkez ce repository.
-Créez une nouvelle branche pour vos modifications :
-git checkout -b feature/nom-de-la-fonctionnalité
 
 Effectuez vos modifications et commitez-les :
 git commit -m "Ajout d'une nouvelle fonctionnalité"
